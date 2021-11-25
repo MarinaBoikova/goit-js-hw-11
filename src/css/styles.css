@@ -11,10 +11,17 @@ body {
   color: #212121;
   line-height: 1.5;
 }
+.search-form{
+  
+}
 
 #search-box {
   font: inherit;
   padding: 8px;
   max-width: 320px;
   margin-bottom: 16px;
+}
+
+button.is-hidden{
+  display: none;
 }
