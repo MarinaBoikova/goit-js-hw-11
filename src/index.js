@@ -1,4 +1,5 @@
 import './css/styles.css';
+import axios from 'axios';
 import Notiflix from 'notiflix';
 
 const baseUrl = 'https://pixabay.com/api/?key=24496142-39f11c79c6568bfa1b54a8aaa&q=';
@@ -12,16 +13,28 @@ const loadMoreBtnRef = document.querySelector('.load-more');
 
 formRef.addEventListener('submit', onImagesSearch);
 
-const fetchImages = () => {
-  return fetch(
+const fetchImages = async () => {
+  // await axios.get
+  const response = await fetch(
     `${baseUrl}${inputImagesName}&image_typ=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`,
-  ).then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    throw new Error(response.status);
-  });
+  );
+  if (response.ok) {
+    return response.json();
+  }
+  throw new Error(response.status);
 };
+
+// const fetchImages = () => {
+//   // await axios.get
+//   return fetch(
+//     `${baseUrl}${inputImagesName}&image_typ=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`,
+//   ).then(response => {
+//     if (response.ok) {
+//       return response.json();
+//     }
+//     throw new Error(response.status);
+//   });
+// };
 
 function clearCards() {
   galleryRef.innerHTML = '';
@@ -72,26 +85,48 @@ const onLoadMore = () => {
   getImages();
 };
 
-const getImages = () => {
-  fetchImages()
-    .then(images => {
-      console.log(images);
-      if (images.total === 0) {
-        loadMoreBtnRef.classList.add('is-hidden');
-        return Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.',
-        );
-      }
-      loadMoreBtnRef.classList.remove('is-hidden');
-      const lastPage = Math.ceil(images.totalHits / imagesPerPage);
-      if (page >= lastPage) {
-        Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-        loadMoreBtnRef.classList.add('is-hidden');
-      }
-      return renderImages(images);
-    })
-    .catch(error => console.error(error));
-  console.log(page);
+const getImages = async () => {
+  try {
+    const images = await fetchImages();
+    console.log(images);
+    if (images.total === 0) {
+      loadMoreBtnRef.classList.add('is-hidden');
+      return Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.',
+      );
+    }
+    loadMoreBtnRef.classList.remove('is-hidden');
+    const lastPage = Math.ceil(images.totalHits / imagesPerPage);
+    if (page >= lastPage) {
+      Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+      loadMoreBtnRef.classList.add('is-hidden');
+    }
+    return renderImages(images);
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+// const getImages = () => {
+//   fetchImages()
+//     .then(images => {
+//       console.log(images);
+//       if (images.total === 0) {
+//         loadMoreBtnRef.classList.add('is-hidden');
+//         return Notiflix.Notify.failure(
+//           'Sorry, there are no images matching your search query. Please try again.',
+//         );
+//       }
+//       loadMoreBtnRef.classList.remove('is-hidden');
+//       const lastPage = Math.ceil(images.totalHits / imagesPerPage);
+//       if (page >= lastPage) {
+//         Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+//         loadMoreBtnRef.classList.add('is-hidden');
+//       }
+//       return renderImages(images);
+//     })
+//     .catch(error => console.error(error));
+//   console.log(page);
+// };
 
 loadMoreBtnRef.addEventListener('click', onLoadMore);
